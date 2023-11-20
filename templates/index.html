@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OC AI Assistant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='fav.ico') }}" type="image/svg+xml">
+</head>
+
+<body>
+    <div class="main-container">
+        <div class="title-container">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Oracle Logo" class="oracle-logo">
+            <h1>Opera Cloud AI Assistant</h1>
+        </div>
+
+        <div class="chat-container">
+            <div class="chat-header">Opera Cloud AI Assistant <span id="darkModeToggle" style="cursor: pointer;">🌙</span>   </div>
+            <div class="chat-content" id="chat-content">
+                <div class="bot-message">{{ initial_message }}</div>
+            </div>
+            <div class="spinner" id="spinner">...</div>
+            <div class="chat-input">
+                <input type="text" id="user-input" placeholder="Type your message...">
+                <button id="send-button">Send</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        var userInputField = document.getElementById("user-input");
+
+        userInputField.addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) {
+                event.preventDefault();  // Prevent default behavior like form submission
+                document.getElementById("send-button").click();  // Trigger the send functionality
+            }
+        });
+
+        function scrollToBottom() {
+            const chatContent = document.getElementById("chat-content");
+            setTimeout(() => {
+                chatContent.scrollTop = chatContent.scrollHeight;
+            }, 0);
+        }
+
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatContent = document.getElementById("chat-content");
+            const initialMessage = chatContent.getAttribute("data-initial-message");
+        
+            if (initialMessage) {
+                const greetingMsg = document.createElement('div');
+                greetingMsg.className = 'bot-message';
+                chatContent.appendChild(greetingMsg);
+        
+                typeMessage(initialMessage, greetingMsg, function() {
+                    chatContent.scrollTop = chatContent.scrollHeight;
+                });
+            }
+        });
+        
+        const darkModeToggle = document.getElementById("darkModeToggle");
+        const body = document.body;
+
+        darkModeToggle.addEventListener("click", function() {
+            if (document.body.classList.contains('dark-mode')) {
+                document.body.classList.remove('dark-mode');
+                darkModeToggle.textContent = "🌙"; 
+            } else {
+                document.body.classList.add('dark-mode');
+                darkModeToggle.textContent = "☀️";  
+            }
+        });
+
+        const section_dict = { /* ... our data here ?? I don't even know at this point! ... */ };
+
+        let typingDotCount = 1  ;
+        function showTypingAnimation(element) {
+            element.innerHTML = ".".repeat(typingDotCount % 5);
+            typingDotCount++;
+            scrollToBottom();
+        }
+
+        function typeMessage(message, container, callback) {
+            container.innerText = ""; 
+            const words = message.split(' ');
+            let i = 0;
+            let wc = 0;
+            const interval = setInterval(() => {
+                if (i < words.length) {
+                    container.innerHTML += words[i] + ' ';
+                    if (wc%20 == 0) { scrollToBottom(); }
+                    wc++;
+                    i++;
+                } else {
+                    clearInterval(interval);
+                    callback();
+                }
+            }, 100);
+        }
+        
+        document.getElementById("send-button").addEventListener("click", function() {
+            const userInput = document.getElementById("user-input");
+            const chatContent = document.getElementById("chat-content");
+            const userMessage = userInput.value.trim();
+        
+            if (userMessage) {
+                chatContent.innerHTML += '<div class="user-message">' + userMessage + '</div>';
+                scrollToBottom();
+                const botTypingMessage = document.createElement('div');
+                botTypingMessage.className = 'bot-message';
+                chatContent.appendChild(botTypingMessage);
+                scrollToBottom();
+
+                setTimeout(scrollToBottom, 0);
+    
+                const typingInterval = setInterval(() => showTypingAnimation(botTypingMessage), 500);
+                //const typingInterval = setInterval(() => showTypingAnimation(botTypingMessage), 500);
+        
+                fetch("/reply_to_query", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        message: userMessage
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    clearInterval(typingInterval);  
+        
+                    if (data.action === "response") {
+                        typeMessage(data.response, botTypingMessage, function() {
+                            scrollToBottom();
+                        });
+                    } else if (data.action === "confirm") {
+                        const confirmMessage = "I am afraid I don't understand your question. Did you mean to ask about " + data.suggested_section_title + "?";
+                        typeMessage(confirmMessage, botTypingMessage, function() {
+                            scrollToBottom();
+        
+                            const buttonContainer = document.createElement('div');
+                            const yesButton = document.createElement('button');
+                            yesButton.innerText = 'Yes';
+                            yesButton.className = 'confirm-button';
+                            yesButton.addEventListener('click', function() {
+                                const responseMsg = document.createElement('div');
+                                responseMsg.className = 'bot-message';
+                                chatContent.appendChild(responseMsg);
+        
+                                typeMessage(data.suggested_section_content, responseMsg, function() {
+                                    chatContent.scrollTop = chatContent.scrollHeight;
+                                });
+                                chatContent.removeChild(buttonContainer);
+                            });
+        
+                            const noButton = document.createElement('button');
+                            noButton.innerText = 'No';
+                            noButton.className = 'confirm-button';
+                            noButton.addEventListener('click', function() {
+                                const responseMsg = document.createElement('div');
+                                responseMsg.className = 'bot-message';
+                                chatContent.appendChild(responseMsg);
+        
+                                typeMessage("Okay. Please let me know if there is anything else I can assist you with.", responseMsg, function() {
+                                    chatContent.scrollTop = chatContent.scrollHeight;
+                                });
+                                chatContent.removeChild(buttonContainer);
+                            });
+        
+                            buttonContainer.appendChild(yesButton);
+                            buttonContainer.appendChild(noButton);
+                            chatContent.appendChild(buttonContainer);
+                        });
+                    }
+                });
+                userInput.value = "";
+            }
+        });    
+    </script>
+
+</body>
+
+</html>
