@@ -135,6 +135,24 @@
         
                     if (data.action === "response") {
                         typeMessage(data.response, botTypingMessage, function() {
+                            // Check if the URL is present in the data
+                            if (data.file_url && data.file_url.trim() !== "") {
+                                // If the URL is present, create and show the button
+                                const buttonContainer = document.createElement('div');
+                                const yesButton = document.createElement('button');
+                                yesButton.innerText = 'Show source in PDF';
+                                yesButton.className = 'confirm-button';
+                                yesButton.addEventListener('click', function() {
+                                    window.open(data.file_url, '_blank');
+                                    chatContent.removeChild(buttonContainer);
+                                });
+
+                                buttonContainer.appendChild(yesButton);
+                                chatContent.appendChild(buttonContainer);
+                            } else {
+                                // If no URL is present, do not create or show the button
+                                console.log('No source URL provided.');
+                            }
                             scrollToBottom();
                         });
                     } else if (data.action === "confirm") {
