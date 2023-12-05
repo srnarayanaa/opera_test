@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<!-- Coding By CodingNepal - www.codingnepalweb.com -->
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Opera Cloud AI Assistant</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Google Fonts Link For Icons -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,400,1,0" />
+	<link rel="icon" href="fav.ico" type="image/svg+xml"> 	
+    <style>
+      /* Import Google font - Poppins */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+body {
+  background: #e4ded5;
+}
+.chatbot-toggler {
+  position: fixed;
+  bottom: 30px;
+  right: 35px;
+  outline: none;
+  border: none;
+  height: 50px;
+  width: 50px;
+  display: flex;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #000000;
+  transition: all 0.2s ease;
+}
+body.show-chatbot .chatbot-toggler {
+  transform: rotate(90deg);
+}
+.chatbot-toggler span {
+  color: #fff;
+  position: absolute;
+}
+.chatbot-toggler span:last-child,
+body.show-chatbot .chatbot-toggler span:first-child  {
+  opacity: 0;
+}
+body.show-chatbot .chatbot-toggler span:last-child {
+  opacity: 1;
+}
+.chatbot {
+  position: fixed;
+  right: 35px;
+  bottom: 90px;
+  width: 95.2%;
+  background: #3a3731;
+  border-radius: 10px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.5);
+  transform-origin: bottom right;
+  box-shadow: 0 0 128px 0 rgba(0,0,0,0.1),
+              0 32px 64px -48px rgba(0,0,0,0.5);
+  transition: all 0.1s ease;
+}
+body.show-chatbot .chatbot {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1);
+}
+.chatbot header {
+  padding: 16px 0;
+  position: relative;
+  text-align: center;
+  color: #fff;
+  background: #221e1d;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+.chatbot header span {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  display: none;
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+header h2 {
+  font-size: 1.4rem;
+}
+.chatbot .chatbox {
+  overflow-y: auto;
+  height: 36vw;
+  padding: 30px 20px 100px;
+}
+.chatbot :where(.chatbox, textarea)::-webkit-scrollbar {
+  width: 6px;
+}
+.chatbot :where(.chatbox, textarea)::-webkit-scrollbar-track {
+  background: #fff;
+  border-radius: 25px;
+}
+.chatbot :where(.chatbox, textarea)::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 25px;
+}
+.chatbox .chat {
+  display: flex;
+  list-style: none;
+}
+.chatbox .outgoing {
+  margin: 20px 0;
+  justify-content: flex-end;
+}
+.chatbox .incoming span {
+  width: 32px;
+  height: 32px;
+  color: #fff;
+  cursor: default;
+  text-align: center;
+  line-height: 32px;
+  align-self: flex-end;
+  background: #000000;
+  border-radius: 4px;
+  margin: 0 10px 7px 0;
+}
+.chatbox .chat p {
+  white-space: pre-wrap;
+  padding: 12px 16px;
+  border-radius: 10px 10px 0 10px;
+  max-width: 75%;
+  color: #000;
+  font-size: 0.95rem;
+  background: #fff;
+}
+.chatbox .incoming p {
+  border-radius: 10px 10px 10px 0;
+}
+.chatbox .chat p.error {
+  color: #721c24;
+  background: #f8d7da;
+}
+.chatbox .incoming p {
+  color: #fff;
+  background: #655f5b;
+}
+.chatbot .chat-input {
+  display: flex;
+  gap: 5px;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background: #fff;
+  padding: 3px 20px;
+  border-top: 1px solid #ddd;
+}
+.chat-input textarea {
+  height: 55px;
+  width: 100%;
+  border: none;
+  outline: none;
+  resize: none;
+  max-height: 180px;
+  padding: 15px 15px 15px 0;
+  font-size: 0.95rem;
+}
+.chat-input span {
+  align-self: flex-end;
+  color: #724ae8;
+  cursor: pointer;
+  height: 55px;
+  display: flex;
+  align-items: center;
+  visibility: hidden;
+  font-size: 1.35rem;
+}
+.chat-input textarea:valid ~ span {
+  visibility: visible;
+}
+
+.confirm-button {
+    padding: 10px 15px;
+    margin-top: 10px;
+    background-color: #000000; /* Green */
+    color: white;
+    border: none;
+    border-radius: 5px;
+	margin-left: 42px;
+    cursor: pointer;
+    /* Add any additional styling as needed */
+}
+
+.pdf-modal-content {
+    background-color: transparent; /* Remove white background */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 70%; /* Width of the modal */
+    height: 70%; /* Height of the modal */
+    border: none; /* Remove borders */
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+}
+
+#pdfPreview {
+    width: 100%;
+    height: 100%;
+    border: none; /* Remove border around iframe */
+    overflow: auto; /* Enable scrolling within the PDF iframe */
+}
+
+.pdf-modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+.chat-logo {
+    width: 32px;  /* Adjust the width as needed */
+    height: 32px; /* Adjust the height as needed */
+    border-radius: 4px; /* Optional: for rounded corners */
+    margin: 0 10px 7px 0; /* Align with chat text */
+}
+
+.close-pdf-modal {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close-pdf-modal:hover,
+.close-pdf-modal:focus {
+    color: red;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+@media (max-width: 490px) {
+  .chatbot-toggler {
+    right: 20px;
+    bottom: 20px;
+  }
+  .chatbot {
+    right: 0;
+    bottom: 0;
+    height: 100%;
+    border-radius: 0;
+    width: 100%;
+  }
+  .chatbot .chatbox {
+    height: 90%;
+    padding: 25px 15px 100px;
+  }
+  .chatbot .chat-input {
+    padding: 5px 15px;
+  }
+  .chatbot header span {
+    display: block;
+  }
+}
+        .main-content {
+            text-align: center;
+            padding: 30px;
+            background: #fff; /* Adjust background as needed */
+        }
+
+        .main-content img {
+            max-width: 180px; /* Adjust size as needed */
+            vertical-align: middle;
+        }
+
+        .main-content h1 {
+            display: inline;
+            margin-left: 20px;
+            font-size: 3rem; /* Adjust font size as needed */
+            /* Additional styling for the title */
+        }
+
+        .additional-header {
+            margin-top: 20px;
+            font-size: 1.5rem; /* Adjust font size as needed */
+            /* Additional styling for headers */
+        }
+    </style>
+
+
+  </head>
+  <body class="show-chatbot">
+    <div class="main-content">
+         <img src="{{ url_for('static', filename='Oracle.png') }}" alt="Oracle Logo" class="oracle-logo">
+
+        <!-- <h1>Opera Cloud AI Assistant</h1>
+        <h2 class="additional-header">Header 1</h2>
+        <h2 class="additional-header">Header 2</h2>
+        <h2 class="additional-header">Header 3</h2> -->
+        <!-- Add more headers or text as needed -->
+    </div>
+    <button class="chatbot-toggler">
+      <span class="material-symbols-rounded">mode_comment</span>
+      <span class="material-symbols-outlined">close</span>
+    </button>
+    <div class="chatbot">
+      <header>
+        <h2>Opera Cloud AI Assistant</h2>
+        <span class="close-btn material-symbols-outlined">close</span>
+      </header>
+      <ul class="chatbox">
+		<li class="chat incoming">
+			<img src="{{ url_for('static', filename='oraclebot.png') }}" alt="Logo" class="chat-logo">
+			<p>Hi there 👋<br>How can I help you today?</p>
+		</li>
+      </ul>
+      <div class="chat-input">
+        <textarea placeholder="Type your query ..." spellcheck="false" required></textarea>
+        <span id="send-btn" class="material-symbols-rounded">send</span>
+      </div>
+    </div>
+	<div id="pdfModal" class="pdf-modal">
+		<div class="pdf-modal-content">
+			<span class="close-pdf-modal">&times;</span>
+			<iframe id="pdfPreview" src="" style="width:100%; height:100%;"></iframe>
+		</div>
+	</div>
+    <script>
+      
+      const chatbotToggler = document.querySelector(".chatbot-toggler");
+      const closeBtn = document.querySelector(".close-btn");
+      const chatbox = document.querySelector(".chatbox");
+      const chatInput = document.querySelector(".chat-input textarea");
+      const sendChatBtn = document.querySelector(".chat-input span");
+
+      let userMessage = null; // Variable to store user's message
+      const inputInitHeight = chatInput.scrollHeight;
+
+      const createChatLi = (message, className) => {
+          // Create a chat <li> element with passed message and className
+          const chatLi = document.createElement("li");
+          chatLi.classList.add("chat", `${className}`);
+          let chatContent = className === "outgoing" ? `<p></p>` : `<img src="{{ url_for('static', filename='oraclebot.png') }}" alt="Logo" class="chat-logo"><p></p>`;
+          chatLi.innerHTML = chatContent;
+          chatLi.querySelector("p").textContent = message;
+          return chatLi; // return chat <li> element
+      };
+
+      const generateResponse = (chatElement) => {
+		const messageElement = chatElement.querySelector("p");
+
+		// Send POST request to your backend, get response and set the response as paragraph text
+		fetch("/reply_to_query", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({
+				message: userMessage // Send the user's message to the backend
+			})
+		})
+		.then(res => res.json())
+		.then(data => {
+			// Use typeMessage function to display the response with typing effect
+			typeMessage(data.response.trim(), messageElement, () => {
+				chatbox.scrollTo(0, chatbox.scrollHeight);
+
+				// Check if the URL is present in the data
+				if (data.file_url && data.file_url.trim() !== "") {
+					// If the URL is present, create and show the button
+					const buttonContainer = document.createElement('div');
+					const showPdfButton = document.createElement('button');
+					showPdfButton.innerText = 'Show source in PDF';
+					showPdfButton.className = 'confirm-button';
+					buttonContainer.appendChild(showPdfButton);
+					chatbox.appendChild(buttonContainer);
+
+					// Add event listener to the newly created button
+					showPdfButton.addEventListener('click', function() {
+						const pdfModal = document.getElementById('pdfModal');
+						const pdfPreview = document.getElementById('pdfPreview');
+						pdfPreview.src = data.file_url; // Set the PDF URL
+						pdfModal.style.display = "block"; // Show the modal
+					});
+				} else {
+					// If no URL is present, do not create or show the button
+					console.log('No source URL provided.');
+				}
+			});
+		})
+		.catch(() => {
+			messageElement.classList.add("error");
+			messageElement.textContent = "Oops! Something went wrong. Please try again.";
+		});
+	};
+
+		
+		
+
+      const handleChat = () => {
+          userMessage = chatInput.value.trim(); 
+          if(!userMessage) return;
+
+          chatInput.value = "";
+          chatInput.style.height = `${inputInitHeight}px`;
+
+          // Append the user's message to the chatbox
+          chatbox.appendChild(createChatLi(userMessage, "outgoing"));
+          chatbox.scrollTo(0, chatbox.scrollHeight);
+          
+          setTimeout(() => {
+              // Display "Thinking..." message while waiting for the response
+              const incomingChatLi = createChatLi("Thinking...", "incoming");
+              chatbox.appendChild(incomingChatLi);
+              chatbox.scrollTo(0, chatbox.scrollHeight);
+              generateResponse(incomingChatLi);
+          }, 600);
+      };
+
+      const typeMessage = (message, container, callback) => {
+          container.innerText = ""; 
+          const words = message.split(' ');
+          let i = 0;
+          let wc = 0;
+          const interval = setInterval(() => {
+              if (i < words.length) {
+                  container.innerHTML += words[i] + ' ';
+                  if (wc % 20 == 0) { scrollToBottom(); }
+                  wc++;
+                  i++;
+              } else {
+                  clearInterval(interval);
+                  callback();
+              }
+          }, 100);
+      };
+
+      const scrollToBottom = () => {
+          chatbox.scrollTop = chatbox.scrollHeight;
+      };
+
+      chatInput.addEventListener("input", () => {
+          // Adjust the height of the input textarea based on its content
+          chatInput.style.height = `${inputInitHeight}px`;
+          chatInput.style.height = `${chatInput.scrollHeight}px`;
+      });
+
+      chatInput.addEventListener("keydown", (e) => {
+          // If Enter key is pressed without Shift key and the window 
+          // width is greater than 800px, handle the chat
+          if(e.key === "Enter" && !e.shiftKey && window.innerWidth > 800) {
+              e.preventDefault();
+              handleChat();
+          }
+      });
+
+      sendChatBtn.addEventListener("click", handleChat);
+      closeBtn.addEventListener("click", () => document.body.classList.remove("show-chatbot"));
+      
+      chatbotToggler.addEventListener("click", () => {
+    document.body.classList.toggle("show-chatbot");
+});
+
+closeBtn.addEventListener("click", () => {
+    document.body.classList.remove("show-chatbot");
+});
+const pdfModal = document.getElementById('pdfModal');
+const closePdfModal = document.querySelector(".close-pdf-modal");
+
+closePdfModal.onclick = function() {
+    pdfModal.style.display = "none";
+    const pdfPreview = document.getElementById('pdfPreview');
+    pdfPreview.src = ''; // Clear the iframe src
+};
+
+// Close the modal if clicked outside of it
+window.onclick = function(event) {
+    if (event.target == pdfModal) {
+        pdfModal.style.display = "none";
+        const pdfPreview = document.getElementById('pdfPreview');
+        pdfPreview.src = ''; // Clear the iframe src
+    }
+};
+
+
+    </script>
+
+  </body>
+</html>
