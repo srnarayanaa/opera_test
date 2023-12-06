@@ -1,16 +1,13 @@
 <!DOCTYPE html>
-<!-- Coding By CodingNepal - www.codingnepalweb.com -->
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
     <title>Opera Cloud AI Assistant</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Google Fonts Link For Icons -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,400,1,0" />
 	<link rel="icon" href="{{ url_for('static', filename='fav.ico') }}" type="image/svg+xml"> 	
     <style>
-      /* Import Google font - Poppins */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
 * {
   margin: 0;
@@ -190,11 +187,10 @@ header h2 {
     border-radius: 5px;
     margin-left: 42px;
     cursor: pointer;
-    /* Add any additional styling as needed */
 }
 
 .pdf-modal-content {
-    background-color: transparent; /* Remove white background */
+    background-color: transparent;
     position: fixed;
     top: 50%;
     left: 50%;
@@ -208,26 +204,26 @@ header h2 {
 #pdfPreview {
     width: 100%;
     height: 100%;
-    border: none; /* Remove border around iframe */
-    overflow: auto; /* Enable scrolling within the PDF iframe */
+    border: none; 
+    overflow: auto; 
 }
 
 .pdf-modal {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 1; /* Sit on top */
+    display: none; 
+    position: fixed; 
+    z-index: 1; 
     left: 0;
     top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    width: 100%; 
+    height: 100%; 
+    background-color: rgba(0,0,0,0.4);
 }
 
 .chat-logo {
-    width: 32px;  /* Adjust the width as needed */
-    height: 32px; /* Adjust the height as needed */
-    border-radius: 4px; /* Optional: for rounded corners */
-    margin: 0 10px 7px 0; /* Align with chat text */
+    width: 32px; 
+    height: 32px; 
+    border-radius: 4px; 
+    margin: 0 10px 7px 0;
 }
 
 .close-pdf-modal {
@@ -270,25 +266,23 @@ header h2 {
         .main-content {
             text-align: center;
             padding: 30px;
-            background: #fff; /* Adjust background as needed */
+            background: #fff;
         }
 
         .main-content img {
-            max-width: 180px; /* Adjust size as needed */
+            max-width: 180px; 
             vertical-align: middle;
         }
 
         .main-content h1 {
             display: inline;
             margin-left: 20px;
-            font-size: 3rem; /* Adjust font size as needed */
-            /* Additional styling for the title */
+            font-size: 3rem; 
         }
 
         .additional-header {
             margin-top: 20px;
-            font-size: 1.5rem; /* Adjust font size as needed */
-            /* Additional styling for headers */
+            font-size: 1.5rem; 
         }
     </style>
 
@@ -298,11 +292,6 @@ header h2 {
     <div class="main-content">
          <img src="{{ url_for('static', filename='Oracle.png') }}" alt="Oracle Logo" class="oracle-logo">
 
-        <!-- <h1>Opera Cloud AI Assistant</h1>
-        <h2 class="additional-header">Header 1</h2>
-        <h2 class="additional-header">Header 2</h2>
-        <h2 class="additional-header">Header 3</h2> -->
-        <!-- Add more headers or text as needed -->
     </div>
     <button class="chatbot-toggler">
       <span class="material-symbols-rounded">mode_comment</span>
@@ -338,41 +327,36 @@ header h2 {
       const chatInput = document.querySelector(".chat-input textarea");
       const sendChatBtn = document.querySelector(".chat-input span");
 
-      let userMessage = null; // Variable to store user's message
+      let userMessage = null;
       const inputInitHeight = chatInput.scrollHeight;
 
       const createChatLi = (message, className) => {
-          // Create a chat <li> element with passed message and className
           const chatLi = document.createElement("li");
           chatLi.classList.add("chat", `${className}`);
           let chatContent = className === "outgoing" ? `<p></p>` : `<img src="{{ url_for('static', filename='oraclebot.png') }}" alt="Logo" class="chat-logo"><p></p>`;
           chatLi.innerHTML = chatContent;
           chatLi.querySelector("p").textContent = message;
-          return chatLi; // return chat <li> element
+          return chatLi; 
       };
 
       const generateResponse = (chatElement) => {
 		const messageElement = chatElement.querySelector("p");
 
-		// Send POST request to your backend, get response and set the response as paragraph text
 		fetch("/reply_to_query", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json"
 			},
 			body: JSON.stringify({
-				message: userMessage // Send the user's message to the backend
+				message: userMessage
 			})
 		})
 		.then(res => res.json())
 		.then(data => {
-			// Use typeMessage function to display the response with typing effect
 			typeMessage(data.response.trim(), messageElement, () => {
 				chatbox.scrollTo(0, chatbox.scrollHeight);
 
-				// Check if the URL is present in the data
 				if (data.file_url && data.file_url.trim() !== "") {
-					// If the URL is present, create and show the button
 					const buttonContainer = document.createElement('div');
 					const showPdfButton = document.createElement('button');
 					showPdfButton.innerText = 'Show source in PDF';
@@ -380,7 +364,6 @@ header h2 {
 					buttonContainer.appendChild(showPdfButton);
 					chatbox.appendChild(buttonContainer);
 
-					// Add event listener to the newly created button
 					showPdfButton.addEventListener('click', function() {
 						const pdfModal = document.getElementById('pdfModal');
 						const pdfPreview = document.getElementById('pdfPreview');
@@ -388,7 +371,6 @@ header h2 {
 						pdfModal.style.display = "block"; // Show the modal
 					});
 				} else {
-					// If no URL is present, do not create or show the button
 					console.log('No source URL provided.');
 				}
 			});
@@ -409,13 +391,11 @@ header h2 {
           chatInput.value = "";
           chatInput.style.height = `${inputInitHeight}px`;
 
-          // Append the user's message to the chatbox
           chatbox.appendChild(createChatLi(userMessage, "outgoing"));
           chatbox.scrollTo(0, chatbox.scrollHeight);
           
           setTimeout(() => {
-              // Display "Thinking..." message while waiting for the response
-              const incomingChatLi = createChatLi("Thinking...", "incoming");
+              const incomingChatLi = createChatLi("Getting response...", "incoming");
               chatbox.appendChild(incomingChatLi);
               chatbox.scrollTo(0, chatbox.scrollHeight);
               generateResponse(incomingChatLi);
@@ -445,14 +425,11 @@ header h2 {
       };
 
       chatInput.addEventListener("input", () => {
-          // Adjust the height of the input textarea based on its content
           chatInput.style.height = `${inputInitHeight}px`;
           chatInput.style.height = `${chatInput.scrollHeight}px`;
       });
 
       chatInput.addEventListener("keydown", (e) => {
-          // If Enter key is pressed without Shift key and the window 
-          // width is greater than 800px, handle the chat
           if(e.key === "Enter" && !e.shiftKey && window.innerWidth > 800) {
               e.preventDefault();
               handleChat();
@@ -475,20 +452,16 @@ const closePdfModal = document.querySelector(".close-pdf-modal");
 closePdfModal.onclick = function() {
     pdfModal.style.display = "none";
     const pdfPreview = document.getElementById('pdfPreview');
-    pdfPreview.src = ''; // Clear the iframe src
+    pdfPreview.src = ''; 
 };
 
-// Close the modal if clicked outside of it
 window.onclick = function(event) {
     if (event.target == pdfModal) {
         pdfModal.style.display = "none";
         const pdfPreview = document.getElementById('pdfPreview');
-        pdfPreview.src = ''; // Clear the iframe src
+        pdfPreview.src = ''; 
     }
 };
-
-
     </script>
-
   </body>
 </html>
